@@ -11,6 +11,7 @@ export default function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loadingMessageId, setLoadingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isFirstLoad = useRef(true); // 初回ロード判定用
 
   const scrollToBottom = useCallback(() => {
     if (messagesEndRef.current) {
@@ -23,38 +24,43 @@ export default function Chat() {
         
         const isOverflowing = container.scrollHeight > availableHeight;
         const isAtBottom = container.scrollHeight - container.scrollTop <= container.clientHeight + 100;
-        const isNewMessage = messages.length > 0 && messages[messages.length - 1].isBot;
 
-        if ((isOverflowing || isNewMessage) && isAtBottom) {
+        if (isOverflowing && isAtBottom) {
           messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
       }
     }
-  }, [messages]);
-
-  // スクロール効果を即座に適用するために、マウント時にも実行
-  useEffect(() => {
-    scrollToBottom();
-  }, [scrollToBottom]);
+  }, []);
 
   // メッセージ更新時のスクロール
   useEffect(() => {
-    // 新規メッセージの場合のみスクロール（再生成は除外）
-    const isNewMessage = messages.length > 0 && 
-      messages[messages.length - 1].isBot && 
-      !loadingMessageId && // 再生成中は除外
-      messages[messages.length - 1].id.startsWith('loading-'); // ローディング開始時のみスクロール
+    const latestMessage = messages[messages.length - 1];
+    if (!latestMessage || isFirstLoad.current) return; // 初回ロード時はスキップ
+
+    const isNewMessage = latestMessage.isBot && 
+      !loadingMessageId && 
+      !latestMessage.isError && 
+      !latestMessage.isRegenerated;
 
     if (isNewMessage) {
       scrollToBottom();
     }
   }, [messages, loadingMessageId, scrollToBottom]);
 
+  // ローカルストレージからのメッセージ読み込みと初回スクロール
   useEffect(() => {
-    // ローカルストレージからメッセージを読み込む
     const storedMessages = localStorage.getItem(STORAGE_KEY);
     if (storedMessages) {
       setMessages(JSON.parse(storedMessages));
+      // メッセージ読み込み後にスクロール
+      setTimeout(() => {
+        if (isFirstLoad.current) {
+          scrollToBottom();
+          isFirstLoad.current = false;
+        }
+      }, 100);
+    } else {
+      isFirstLoad.current = false; // メッセージがない場合はフラグを下ろす
     }
   }, []);
 
@@ -83,6 +89,7 @@ export default function Chat() {
       };
       
       setMessages(prev => [...prev, userMessage]);
+      // ユーザーメッセージ送信時は必ずスクロール
       setTimeout(scrollToBottom, 100);
 
       const loadingMessage: ChatMessage = {
@@ -104,18 +111,19 @@ export default function Chat() {
         content: convertedLyrics,
         isBot: true,
         timestamp: Date.now(),
+        isRegenerated: messageIndexToReplace !== undefined,
       };
       
       setMessages(prev => {
         if (messageIndexToReplace !== undefined) {
           const newMessages = [...prev];
           newMessages[messageIndexToReplace] = botResponse;
+          // 再生成時は特定のメッセージまでスクロール
           setTimeout(() => scrollToMessage(botResponse.id), 100);
           return newMessages;
         }
-        const newMessages = prev.slice(0, -1).concat(botResponse);
-        setTimeout(scrollToBottom, 100);
-        return newMessages;
+        // 新規メッセージの場合はuseEffectでスクロール制御
+        return prev.slice(0, -1).concat(botResponse);
       });
     } catch {
       const errorResponse: ChatMessage = {
@@ -123,6 +131,8 @@ export default function Chat() {
         content: 'ごめんね。変換に失敗しちゃった。とほほ・・・。',
         isBot: true,
         timestamp: Date.now(),
+        isError: true,
+        isRegenerated: messageIndexToReplace !== undefined,
       };
 
       setMessages(prev => {

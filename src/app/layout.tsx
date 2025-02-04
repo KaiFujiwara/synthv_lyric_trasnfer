@@ -15,6 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SynthV 打ち込みちゃん",
   description: "歌詞をSynthesizerVに打ち込むテキストに変換するだけのアプリ",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+  },
 };
 
 export default function RootLayout({

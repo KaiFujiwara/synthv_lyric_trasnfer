@@ -4,6 +4,7 @@ export interface ChatMessage {
   isBot: boolean;
   timestamp: number;
   isError?: boolean;
+  isRegenerated?: boolean;
 }
 
 export interface ChatHistory {
