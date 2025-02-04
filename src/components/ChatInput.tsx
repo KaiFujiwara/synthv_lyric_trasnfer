@@ -39,7 +39,7 @@ export default function ChatInput({ onSend, disabled }: ChatInputProps) {
           onKeyDown={handleKeyDown}
           placeholder="歌詞を入力してください..."
           disabled={disabled}
-          className="flex-1 bg-white rounded-lg p-2 sm:p-3 resize-none h-[80px] sm:h-[100px] text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black whitespace-pre-wrap"
+          className="flex-1 bg-white rounded-lg p-2 sm:p-3 resize-none h-[80px] sm:h-[100px] text-[16px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black whitespace-pre-wrap"
         />
         <button
           type="submit"

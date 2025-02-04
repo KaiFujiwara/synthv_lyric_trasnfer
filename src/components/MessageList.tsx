@@ -12,7 +12,12 @@ export default function MessageList({ messages, onRegenerate }: MessageListProps
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-5">
+    <div className="flex-1 overflow-y-auto p-5 overscroll-none" 
+         style={{
+           height: messages.length > 0 ? 'auto' : '100%',
+           WebkitOverflowScrolling: 'touch',
+           paddingBottom: 'calc(env(safe-area-inset-bottom) + 120px)'
+         }}>
       {messages.map((message) => (
         <div key={message.id} className={`mb-5 flex items-start gap-2 ${message.isBot ? 'bg-gray-200' : 'justify-end'}`}>
           {message.isBot && (
