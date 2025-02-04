@@ -65,7 +65,7 @@ export default function Message({ content, isBot, onRegenerate, isLoading, isErr
               <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-200" />
             </div>
           ) : (
-            <p className="text-sm">{content}</p>
+            <p className="text-sm whitespace-pre-wrap">{content}</p>
           )}
         </div>
         
