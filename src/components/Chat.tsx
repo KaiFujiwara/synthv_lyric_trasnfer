@@ -6,12 +6,14 @@ import ChatInput from './ChatInput';
 import Message from './Message';
 import Header from './Header';
 import { convertLyrics } from '../utils/api';
+import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
 
 export default function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loadingMessageId, setLoadingMessageId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isFirstLoad = useRef(true); // 初回ロード判定用
+  const [input, setInput] = useState(''); // 追加
 
   const scrollToBottom = useCallback(() => {
     if (messagesEndRef.current) {
@@ -181,7 +183,29 @@ export default function Chat() {
           ))}
         </div>
       </div>
-      <ChatInput onSend={handleSendMessage} disabled={!!loadingMessageId} />
+      <div className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-sm border-t border-white/10">
+        <div className="max-w-7xl mx-auto p-2 sm:p-4 flex gap-2 sm:gap-4">
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            className="flex-1 bg-white rounded-lg p-2 sm:p-3 resize-none h-[80px] sm:h-[100px] text-[16px] sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-black whitespace-pre-wrap"
+            placeholder="歌詞を入力してください..."
+          />
+          <button
+            onClick={() => {
+              if (input.trim()) {
+                handleSendMessage(input);
+                setInput('');
+              }
+            }}
+            disabled={!input.trim() || !!loadingMessageId}
+            aria-label="送信"
+            className="px-2 sm:px-4 bg-blue-600 rounded-lg hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <PaperAirplaneIcon className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+        </div>
+      </div>
     </div>
   );
 } 
