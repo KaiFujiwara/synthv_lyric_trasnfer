@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChatMessage, STORAGE_KEY, MAX_STORAGE_ITEMS } from '../types/chat';
-import ChatInput from './ChatInput';
 import Message from './Message';
 import Header from './Header';
 import { convertLyrics } from '../utils/api';
